@@ -160,15 +160,29 @@ class Handlers:
         self.Createbutton.pack(pady = (0,10))
         newFrame.pack()
     def FolderCreation(self):
-        newid = gdrive.CreateFolder(drive,self.NewNameObject.get(),self.TeacherIds[self.teacher])
+        name = self.NewNameObject.get()
+        dummy = name.split()
+        name = ""
+        for part in dummy:
+            name += part[0].upper() + part[1:].lower() + " "
+        
+        newid = gdrive.CreateFolder(drive,name,folders[TypeVar.get()])
         self.slave.destroy()
-        DocId = gdrive.CreateFolder(drive,"Documents",newid)
-        CodeId = gdrive.CreateFolder(drive,"Code",newid)
-        #gdrive.CopyTechnicalReport(drive,DocId)
-        self.TeamFolder = gdrive.GetFolders (drive,self.TeacherIds[self.teacher])
-        Teams = GetList(self.TeamFolder)
+        LevelId = gdrive.CreateFolder(drive,"Codologie II (Intermediate)",newid)
+        DocId = gdrive.CreateFolder(drive,"Documents",LevelId)
+        CodeId = gdrive.CreateFolder(drive,"Code",LevelId)
+        MediaId = gdrive.CreateFolder(drive,"Media",LevelId)
 
-        m.UpdateMenu(GroupNames,Teams,True)
+        self.StudentsIds = gdrive.GetFolders(drive,folders[TypeVar.get()])
+        
+        Students = GetList(self.StudentsIds)
+        Students.sort()
+        m.UpdateMenu(StudentNames,Students,True)
+        #gdrive.CopyTechnicalReport(drive,DocId)
+        #self.TeamFolder = gdrive.GetFolders (drive,self.TeacherIds[self.teacher])
+        #Teams = GetList(self.TeamFolder)
+
+        #m.UpdateMenu(GroupNames,Teams,True)
     def CreateAlert(self,message):
         self.slave = slave = tk.Tk()
         newFrame = tk.Frame(self.slave, width = 200)
