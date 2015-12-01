@@ -1,26 +1,55 @@
-Please put folders using this stucture:
-File Structure for both folder and file:
-/home/pi
+Hello Fellow Mentors,
 
-The only folders that are there now are : Desktop, MxPiDrive, python_games
-The only file that there is: mxUpload
+This project was made so it can ease the creation and maintenance of folders in the Irvine Google Drive. The Program automatically uploads and downloads the correct code that the student was working with. 
 
-Open a console and type in: sh mxUpload
+_________________________________________________________________
 
-if you have internet it will run sucessfully
+Installation:
 
-if not the error will tell you that you don't
+If you are downloading the program for windows, go to the Github or wherever Kumar decides to host the program, for right now I have it under my Github under user: yoshiscienceguy
 
-make sure the school's internet allows connection to Google Drive. Pretty sure they do.
+The link - https://github.com/yoshiscienceguy/IrvineUploadProgram
 
-It's highly recommended that you don't edit any of the python files, because half of the coding I did it and it's just going to be chaos if you do. But if you want to tiker around with it, you are more than welcome.
+Windows:
 
-The structure that the school's drive should be is for example:
+Download the zip so you can grab everything.
+Extract the contents in the Document Folder, so Students won't touch it
+Inside there is a folder called MxPiDrive, that is the main folder that contains the program. Open the Folder and inside there is a file called GUI.py That is the main program. Right click it and point it to "Send to" and send to the Desktop. This creates a shortcut of the program to the Desktop
+Go to the Desktop and look for the shortcut. Right click the shortcut and go to it's properties. Click on Change Icon button and navigate through your Documents and find the Irvine Upload Program. Inside is an icon with the mathobotix logo. Click it and then click ok. 
+Change the Shortcut's name. The current name of the project is called MxUpload. You have to ask if this is still the correct name.
+Done! Run it to see if it works. - Pretty sure it does, tested 11/30/15 by Fernando
 
-Ponderosa -> [Teacher's Name] -> [Team Name] -> [Code]/[Document]
+RaspberryPi/Unix:
 
-The program is designed to make teams relativley easy. For example, if I am trying to make a team called "Team Red".
+Make sure you are online
+Open Terminal
+type "git clone **the link above** "
+the program should be downloaded to your main home directory of the RPi. Ex- "\home\pi"
+Go to the your home directory and find the downloaded items and look for the Setup file if it exists.
+Go to the Console and type in sudo sh Setup
+Everything is done for you. Congrats
+Double click the shortcut on the Desktop to see if it works.
+Hurray! Done!
 
-I launch the program by typing sh mxUpload, select the school, click on "(Create New Team"), type new team name. Give a few seconds, it's creating the team folder and adding the technical report template. The list should update automatically. Select the team, then click "choose" button. Then you will see 2 folders, Code and Document. Choose whichever of those 2 folders and click upload. Look for the file on the popup window and click it, then click Open. Once clicked the file will be uploaded and the text will change to "Upload 'filename' sucessfull" Then you are done!
+_________________________________________________________________
+TODO:
+- Comment my Code!!!!!
+- Optimize Searches, Too much iteration searching (maybe build query table?) ... maybe
+- Someone work on the Documentation! I am not good at writing. The Cake's a Lie
+_________________________________________________________________
 
-Any feedback is appreciated. 
+Bugs:
+
+- None So Far
+
+_________________________________________________________________
+
+Versions:
+
+- This is version 3.1.1
+This is version 3 because its predecesors are the ACSD version, and the Primitive text based Irvine version.
+
+_________________________________________________________________
+
+Last edited: 11/30/15 - Fernando
+
