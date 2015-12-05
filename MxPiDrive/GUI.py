@@ -9,9 +9,14 @@ except:
     print("You Don't Have an Active Internet Connection")
     print("Please ask a Mentor for HELP")
     quit()
+Level = [("Intro","Codologie I (Intro)"),
+         ("Intermediate","Codologie II (Intermediate)"),
+         ("Advanced","Codologie III (Advanced)")]
 class Menu():
     def __init__(self):
         self.root = tk.Tk()
+        self.root.minsize(400,200)
+        self.root.maxsize(400,500)
         self.root.title("Google Drive Upload")
         self.master = tk.Frame(self.root,width= 300)
         self.menu = tk.Frame(self.root,width= 300)
@@ -36,22 +41,26 @@ class Menu():
 
         return submit
     
-    def drawRadioButtons(self,frame):
-        v = tk.StringVar()
+    def drawRadioButtons(self,frame,options):
+        self.v = tk.StringVar()
 
         Buttons = []
-        for texts, unit in UNITS:
-            rb = tk.Radiobutton(frame, text = texts, variable = v, value = unit)
+        
+        for texts, option in options:
+            rb = tk.Radiobutton(frame, text = texts, variable = self.v, value = option)
             rb.pack(anchor = tk.W)
             rb.deselect()
             Buttons.append(rb)
-        v.set("Hardware Terminology")
-        return v, Buttons
+
+        
+        self.v.set(options[1][1])
+        return Buttons , self.v
     def drawMenu(self,frame,listDisplay,NewOption = False):
 
         scrollbar = tk.Scrollbar(frame,orient = tk.VERTICAL)
-        listbox = tk.Listbox(frame,yscrollcommand = scrollbar.set,width = 50)
+        listbox = tk.Listbox(frame,yscrollcommand = scrollbar.set,width = 30)
         scrollbar.config(command = listbox.yview)
+        
 
         if(NewOption):
             listbox.insert(tk.END,"(create New)")
@@ -60,16 +69,20 @@ class Menu():
 
         return listbox,scrollbar
     def drawMessage(self,frame,toSay):
-        var = tk.StringVar()
-        textbox = tk.Label(frame,textvariable = var)
-        var.set(toSay)
+        self.vartoSay = tk.StringVar()
+        textbox = tk.Label(frame,textvariable = self.vartoSay, fg = "red",font = ("Helvetica",10))
+        self.vartoSay.set(toSay)
         textbox.pack(pady = 10)
-        return var
+        return self.vartoSay
+    
     def drawTextBox (self,frame):
-        userinput = tk.StringVar()
-        entry = tk.Entry(frame,textvariable = userinput,width = 50,justify =tk.CENTER)
-        entry.pack(pady = 10)
-        return entry , userinput
+        self.userinput = tk.StringVar()
+        self.entry = tk.Entry(frame,textvariable = self.userinput,width = 30,justify =tk.CENTER)
+        self.entry.bind("<Button-1>", lambda clicked : self.userinput.set(""))
+        self.userinput.set("Enter Name Here")
+        self.entry.pack(pady = 10)
+        return self.entry , self.userinput
+
     def UpdateList(self,obj,var,lis):
         obj["menu"].delete(0,"end")
         var.set ("Choose One")
@@ -79,35 +92,27 @@ class Menu():
     
         obj.delete(0,tk.END)
         if(makeNew):
-            obj.insert(tk.END,"(Create New Team)")
+            obj.insert(tk.END,"(Create New Student Folder)")
         for thing in newlist:
             obj.insert(tk.END,thing)
     def packMenu(self,listbox,scrollbar):
         
-        listbox.pack(side = tk.LEFT, fill = tk.BOTH, expand = 1)
+        listbox.pack(side = tk.LEFT, fill = tk.BOTH, expand = 0)
         scrollbar.pack(side = tk.RIGHT, fill = tk.Y)
 
 class Handlers:
-    def __init__(self):
-        self.school = ""
-        self.day = time.strftime("%A")
-        self.teacher = ""
-        self.dayID = ""
-        self.TeacherIds = {}
-        self.TeamIds = {}
-        self.TeamFolder = {}
 
     def StudentLevel(self,p,a,c):
 
         try:
+
             if(StudentLevelVar.get() == "Choose One"):
                 return
             DisplayText.set("Current Selected: "+ self.studentName+"\n\nSelect Student's Project\n\n")
             m.packMenu(StudentNames,gns)
-            print(self.LevelIDs)
-            print(StudentLevelVar.get())
+
             UploadFolderID = self.LevelIDs[StudentLevelVar.get()]
-            print("hi")
+
             self.Projects = gdrive.GetFolders(drive,UploadFolderID)
             CodeFolder = gdrive.GetFiles(drive,self.Projects["Code"])
             self.CodeFolderId = self.Projects["Code"]
@@ -118,16 +123,20 @@ class Handlers:
                TechnicalReport.pack() 
 
             ChooseUploadFolder.pack()
-            ChooseDownloadCode.pack()
+            ChooseDownloadCode.pack(anchor = tk.W)
 
 
         except:
+            print("something")
             pass
 
     def StudentType(self,p,a,c):
         #used
         
         try:
+            StudentNames.unbind("<Double-Button-1>")
+            StudentNames.bind("<Double-Button-1>",self.ChooseStudent)
+            
             DisplayText.set("Select Student's Name")
             os = platform.platform().split('-')[0]
             if(os == "Windows"):
@@ -151,33 +160,52 @@ class Handlers:
             print("Starting")
             pass
     def CreateNewFolder(self):
-        self.slave = tk.Tk()
-        newFrame = tk.Frame(self.slave,width = 200)
-        self.slave.title("Enter New Folder Name")
+        self.slaveMain = tk.Toplevel(m.master)
+        self.slaveMain.geometry("300x250")
+        newFrame = tk.Frame(self.slaveMain,width = 500)
+        self.slaveMain.title("Enter New Folder Name")
+        self.NewTextMessage = m.drawMessage(newFrame,"Select New Student's Level")
+        self.NewLevelObject, self.NewLevelVariable = m.drawRadioButtons(newFrame,Level)
+        self.NewTextMessage = m.drawMessage(newFrame,"Enter the New Student's Name")
         self.NewNameObject, self.NewNameVariable = m.drawTextBox(newFrame)
         
         self.Createbutton = m.drawButton(newFrame,"Create","h.FolderCreation")
         self.Createbutton.pack(pady = (0,10))
         newFrame.pack()
+        newFrame.update()
+    def Exists(self,name):
+        if(name in self.StudentsIds):
+            return True
+        return False
     def FolderCreation(self):
         name = self.NewNameObject.get()
-        dummy = name.split()
-        name = ""
-        for part in dummy:
-            name += part[0].upper() + part[1:].lower() + " "
-        
-        newid = gdrive.CreateFolder(drive,name,folders[TypeVar.get()])
-        self.slave.destroy()
-        LevelId = gdrive.CreateFolder(drive,"Codologie II (Intermediate)",newid)
-        DocId = gdrive.CreateFolder(drive,"Documents",LevelId)
-        CodeId = gdrive.CreateFolder(drive,"Code",LevelId)
-        MediaId = gdrive.CreateFolder(drive,"Media",LevelId)
+        if(name.strip() != "" and name != "Enter Name Here"):
+            
+            dummy = name.split()
+            name = ""
+            for part in dummy:
+                name += part[0].upper() + part[1:].lower() + " "
+            if(not self.Exists(name)):
+                newid = gdrive.CreateFolder(drive,name,folders[TypeVar.get()])
+                try:
+                    self.slave.destroy()
+                except:
+                    self.slaveMain.destroy()
+                
+                LevelId = gdrive.CreateFolder(drive,self.NewLevelVariable.get(),newid)
+                DocId = gdrive.CreateFolder(drive,"Documents",LevelId)
+                CodeId = gdrive.CreateFolder(drive,"Code",LevelId)
+                MediaId = gdrive.CreateFolder(drive,"Media",LevelId)
 
-        self.StudentsIds = gdrive.GetFolders(drive,folders[TypeVar.get()])
-        
-        Students = GetList(self.StudentsIds)
-        Students.sort()
-        m.UpdateMenu(StudentNames,Students,True)
+                self.StudentsIds = gdrive.GetFolders(drive,folders[TypeVar.get()])
+                
+                Students = GetList(self.StudentsIds)
+                Students.sort()
+                m.UpdateMenu(StudentNames,Students,True)
+            else:
+                self.CreateAlert("The Folder Already Exists")
+        else:
+            self.CreateAlert("Please Enter a Name")
         #gdrive.CopyTechnicalReport(drive,DocId)
         #self.TeamFolder = gdrive.GetFolders (drive,self.TeacherIds[self.teacher])
         #Teams = GetList(self.TeamFolder)
@@ -195,42 +223,48 @@ class Handlers:
         self.Createbutton.pack(pady = (0,10))
         newFrame.pack()
     def destroy(self):
-        self.slave.destroy()
-    def ChooseStudent(self):
         try:
-            if(int(StudentNames.curselection()[0]) == 0):
-                self.CreateNewFolder()
-            else:
-                
-                Students = GetList(self.StudentsIds)
-                Students.sort()
-                self.studentName = Students[int(StudentNames.curselection()[0])-1]
-                self.studentID = self.StudentsIds[self.studentName]
-                self.LevelIDs = gdrive.GetFolders(drive,self.studentID)
-        
-                DisplayText.set("Choose Student's Level")
-                
-
-                self.Levels = GetList(self.LevelIDs)
-                self.Levels.sort()
-
-                StudentLevelObj.pack()
-                m.UpdateList (StudentLevelObj,StudentLevelVar,self.Levels)
-                
-                self.UploadFolderId = self.LevelIDs[self.Levels[0]]
+            self.slave.destroy()
+        except:
+            self.slaveMain.destroy()
+    def ChooseStudent(self,event = None):
+##        try:
+        if(int(StudentNames.curselection()[0]) == 0):
+            
+            self.CreateNewFolder()
+            
+        else:
+            StudentNames.unbind("<Double-Button-1>")
+            StudentNames.bind("<Double-Button-1>",h.DownloadButton)
+            Students = GetList(self.StudentsIds)
+            Students.sort()
+            self.studentName = Students[int(StudentNames.curselection()[0])-1]
+            self.studentID = self.StudentsIds[self.studentName]
+            self.LevelIDs = gdrive.GetFolders(drive,self.studentID)
+            print(self.studentName)
+            DisplayText.set("Choose Student's Level")
             
 
-                
-                self.UploadDirectoryIds= gdrive.GetFiles(drive,self.UploadFolderId)
-                self.UploadDirectory = GetList(self.UploadDirectoryIds)
-                
-                
+            self.Levels = GetList(self.LevelIDs)
+            self.Levels.sort()
 
-                m.UpdateMenu(StudentNames,self.UploadDirectory,False)
-                StudentNames.pack_forget()
-                gns.pack_forget()
-                
-                chooseGroupButton.pack_forget()
+            StudentLevelObj.pack()
+            m.UpdateList (StudentLevelObj,StudentLevelVar,self.Levels)
+            
+            self.UploadFolderId = self.LevelIDs[self.Levels[0]]
+        
+
+            
+            self.UploadDirectoryIds= gdrive.GetFiles(drive,self.UploadFolderId)
+            self.UploadDirectory = GetList(self.UploadDirectoryIds)
+            
+            
+
+            m.UpdateMenu(StudentNames,self.UploadDirectory,False)
+            StudentNames.pack_forget()
+            gns.pack_forget()
+            
+            chooseGroupButton.pack_forget()
                 
 
                 #m.packMenu(GroupFolders,gfs)
@@ -241,8 +275,8 @@ class Handlers:
                     
      
                 #self.CreateAlert("Please Choose a Team")
-        except:
-            self.CreateAlert("Choose a Name")
+##        except:
+##            self.CreateAlert("Choose a Name")
             
     def TechnicalReport(self,silent = False):
         try:
@@ -316,7 +350,7 @@ class Handlers:
             self.CreateAlert("Please Select a Folder")
 
 
-    def DownloadButton(self):
+    def DownloadButton(self,event = None):
         try:
             #Folder2Download = self.TeamFolder['Code']
             path = '/home/pi'
@@ -369,6 +403,8 @@ StudentLevelObj,StudentLevelVar = m.drawDropDown(m.master,"h.StudentLevel",[""])
 StudentLevelObj.pack_forget()
 DisplayText = m.drawMessage(m.master,"Please Choose a School")
 StudentNames,gns = m.drawMenu(m.menu,[],True)
+
+StudentNames.bind("<Double-Button-1>",h.ChooseStudent)
 DisplayText.set("Welcome to MxUpload")
 chooseGroupButton = m.drawButton(m.buttons,"Choose","h.ChooseStudent")
 ##

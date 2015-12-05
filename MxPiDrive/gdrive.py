@@ -131,7 +131,7 @@ def CreateFolder(drive,FolderName,ParentId):
 ##
 ##for file1 in file_list:
 ##    #print(file1['alternateLink'])
-##    if(file1['mimeType'] == "application/vnd.google-apps.folder" and file1["title"] != "Buildologie"):
+##    if(file1['mimeType'] == "application/vnd.google-apps.folder" and not file1["title"] in ["Codologie","K-12 STEM Club"]):
 ##        sublist = drive.ListFile({"q":"'"+file1["id"]+"' in parents and trashed = false"}).GetList()
 ##        for file2 in sublist:
 ##
@@ -139,71 +139,73 @@ def CreateFolder(drive,FolderName,ParentId):
 ##            if(file2["title"] != ""):
 ##                print(file2["title"])
 ##                sublist = drive.ListFile({"q":"'"+file2["id"]+"' in parents and trashed = false"}).GetList()
-##                found = False
+##                Codefound = False
+##                Docfound = False
+##                Mediafound = False
+##                
 ##                exists = False
+##                
 ##                for file3 in sublist:
-##                    if(file3["title"] == "Codologie II (Intermediate)"):
-##                        exists = True
-##                        break
-##                    if( file3["title"] in ["Code","Document","Media", "Documents"]):
-##                        found = True
+####                    if(file3["title"] == "Codologie II (Intermediate)"):
+####                        exists = True
+####                        break
+##                    if( file3["title"].lower() == "code"):
+##                        Codefound = True
+##                    if( file3["title"].lower() == "document" or file3["title"].lower() == "documents"):
+##                        Docfound = True
+##                    if( file3["title"].lower() == "media"):
+##                        Mediafound = True
 ##                        
-##                        file4 = drive.CreateFile({'title': "Codologie II (Intermediate)", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
-##                        file4.Upload()
-##                        break
-##                if (not exists):
+##                        #file4 = drive.CreateFile({'title': "Codologie II (Intermediate)", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
+##                        #file4.Upload()
+##                        
 ##
-##                    if(not found):
-##                        filec = drive.CreateFile({'title': "Code", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
-##                        filec.Upload()
-##                        fileb = drive.CreateFile({'title': "Document", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
-##                        fileb.Upload()
-##                        filea = drive.CreateFile({'title': "Media", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
-##                        filea.Upload()
-##                        file4 = drive.CreateFile({'title': "Codologie II (Intermediate)", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
-##                        file4.Upload()
-##                        
-##                    id1 = 0
-##                    sublist = drive.ListFile({"q":"'"+file2["id"]+"' in parents and trashed = false"}).GetList()
+##
+##                if(not Codefound):
+##                    filec = drive.CreateFile({'title': "Code", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
+##                    filec.Upload()
+##                if(not Docfound):
+##                    fileb = drive.CreateFile({'title': "Document", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
+##                    fileb.Upload()
+##                if(not Mediafound):
+##                    filea = drive.CreateFile({'title': "Media", "parents":  [{"id": file2['id']}], "mimeType": "application/vnd.google-apps.folder"})
+##                    filea.Upload()
 ##                    
-##                    for file3 in sublist:
-##                        if(file3["title"] =="Codologie II (Intermediate)"):
-##                            id1 = file3["id"]
-##                            break
-##                    for file3 in sublist:
-##                        if(file3["title"] == "Code"):
-##                            CodeId = file3["id"]
-##                            break
-##                    for file3 in sublist:
-##                        if(file3["title"] in ["Document","Documents"]):
-##                            DocId = file3["id"]
-##                            break
-##                    for file3 in sublist:
-##                        if(file3["title"] == "Media"):
-##                            MediaId = file3["id"]
-##                            break
-##                    for file3 in sublist:
-##                        
-##                        if((not file3["title"] in ["Code","Document","Media", "Documents","Codologie II (Intermediate)"])):
-##                            print(file3["title"])
-##                            ext = file3["title"].split(".")[-1].lower() 
-##                            print(ext + " " +" <-------This")
-##                            if(ext in ["jpg","png","bmp"]):
-##                                file3["parents"] = [{"id":MediaId}]
-##                                file3.Upload()
-##                            elif(ext in ["doc","txt"] or len(ext) > 3 and not (file3['mimeType'] == "application/vnd.google-apps.folder")):
-##                                file3["parents"]= [{"id": DocId}]
-##                                file3.Upload()
-##                            elif(ext in ["py","sb2"] or (file3['mimeType'] == "application/vnd.google-apps.folder") and not file3["title"] in ["Code","Document","Media", "Documents","Codologie II (Intermediate)"] ):
-##                                file3["parents"]= [{"id": CodeId}]
-##                                file3.Upload()
 ##
-##                    sublist = drive.ListFile({"q":"'"+file2["id"]+"' in parents and trashed = false"}).GetList()
-##            
-##                    for file3 in sublist:
-##                        if( file3["title"] in ["Code","Document","Media", "Documents"]):
-##                            file3["parents"]= [{"id": id1}]
+##                sublist = drive.ListFile({"q":"'"+file2["id"]+"' in parents and trashed = false"}).GetList()
+##                
+##
+##                for file3 in sublist:
+##                    if(file3["title"] == "Code"):
+##                        CodeId = file3["id"]
+##                        break
+##                for file3 in sublist:
+##                    if(file3["title"] in ["Document","Documents"]):
+##                        DocId = file3["id"]
+##                        break
+##                for file3 in sublist:
+##                    if(file3["title"] == "Media"):
+##                        MediaId = file3["id"]
+##                        break
+##                for file3 in sublist:
+##                    
+##                    if((not file3["title"] in ["Code","Document","Media", "Documents"])):
+##                        print(file3["title"])
+##                        ext = file3["title"].split(".")[-1].lower() 
+##                        print(ext + " " +" <-------This")
+##                        if(ext in ["jpg","png","bmp"] or file3["title"].lower() in ["picture","pictures","photos","videos","video","pics","pic"]):
+##                            file3["parents"] = [{"id":MediaId}]
 ##                            file3.Upload()
+##                        elif(ext in ["doc","txt"] or len(ext) > 3 or file3["title"].lower() in ["technical report","report","technical"]):
+##                            file3["parents"]= [{"id": DocId}]
+##                            file3.Upload()
+##                        elif(not file3["title"] in ["Code","Document","Media", "Documents"] ):
+##                            file3["parents"]= [{"id": CodeId}]
+##                            file3.Upload()
+##
+##                sublist = drive.ListFile({"q":"'"+file2["id"]+"' in parents and trashed = false"}).GetList()
+##        
+
     
 ##DRIVE = Connect()
 ##Ids = GetSchoolFolderIDs(DRIVE)
