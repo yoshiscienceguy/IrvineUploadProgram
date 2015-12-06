@@ -9,9 +9,22 @@ except:
     print("You Don't Have an Active Internet Connection")
     print("Please ask a Mentor for HELP")
     quit()
-Level = [("Intro","Codologie I (Intro)"),
-         ("Intermediate","Codologie II (Intermediate)"),
-         ("Advanced","Codologie III (Advanced)")]
+StemLevels = [("Buildologie","Buildologie - (Tot-Bot)"),
+              ("Buildologie I","Buildologie I - (Elementary)"),
+              ("Buildologie II","Buildologie II - (Junior High)"),
+              ("Buildologie III","Buildologie III - (High School)"),
+              ("Intro Codologie","Codologie I (Intro)"),
+              ("Intermediate Codologie","Codologie II (Intermediate)"),
+              ("Advanced Codologie","Codologie III (Advanced)")]
+
+CodologieLevel = [("Intro Codologie","Codologie I (Intro)"),
+                  ("Intermediate Codologie","Codologie II (Intermediate)"),
+                  ("Advanced Codologie","Codologie III (Advanced)")]
+
+BuildologieLevel = [("Buildologie","Buildologie - (Tot-Bot)"),
+                  ("Buildologie I","Buildologie I - (Elementary)"),
+                  ("Buildologie II","Buildologie II - (Junior High)"),
+                  ("Buildologie III","Buildologie III - (High School)")]
 class Menu():
     def __init__(self):
         self.root = tk.Tk()
@@ -41,19 +54,32 @@ class Menu():
 
         return submit
     
-    def drawRadioButtons(self,frame,options):
+    def drawRadioButtons(self,frame,options,excluded = None):
+        
         self.v = tk.StringVar()
 
         Buttons = []
-        
-        for texts, option in options:
-            rb = tk.Radiobutton(frame, text = texts, variable = self.v, value = option)
-            rb.pack(anchor = tk.W)
-            rb.deselect()
-            Buttons.append(rb)
+        if(excluded == None):
+            for texts, option in options:
+                rb = tk.Radiobutton(frame, text = texts, variable = self.v, value = option)
+                rb.pack(anchor = tk.W)
+                rb.deselect()
+                Buttons.append(rb)
+            self.v.set(options[1][1])
+        else:
 
+            for texts, option in options:
+                if(option in excluded):
+                    rb = tk.Radiobutton(frame, text = texts, variable = self.v, value = option,state = "disabled")
+                else:
+                    rb = tk.Radiobutton(frame, text = texts, variable = self.v, value = option)
+                
+                rb.pack(anchor = tk.W)
+                rb.deselect()
+                Buttons.append(rb)
+            self.v.set(options[0][1])
         
-        self.v.set(options[1][1])
+        
         return Buttons , self.v
     def drawMenu(self,frame,listDisplay,NewOption = False):
 
@@ -125,7 +151,7 @@ class Handlers:
             ChooseUploadFolder.pack()
             ChooseDownloadCode.pack(anchor = tk.W)
 
-
+            newLevelButton.pack_forget()
         except:
             print("something")
             pass
@@ -156,6 +182,7 @@ class Handlers:
             m.UpdateMenu(StudentNames,Students,True)
             chooseGroupButton.pack(pady = 10)
             m.buttons.pack()
+            newLevelButton.pack_forget()
         except:
             print("Starting")
             pass
@@ -165,7 +192,15 @@ class Handlers:
         newFrame = tk.Frame(self.slaveMain,width = 500)
         self.slaveMain.title("Enter New Folder Name")
         self.NewTextMessage = m.drawMessage(newFrame,"Select New Student's Level")
-        self.NewLevelObject, self.NewLevelVariable = m.drawRadioButtons(newFrame,Level)
+        if(TypeVar.get() == "Buildologie"):
+            self.slaveMain.geometry("300x280")
+            self.NewLevelObject, self.NewLevelVariable = m.drawRadioButtons(newFrame,BuildologieLevel)
+        elif(TypeVar.get() == "Codologie"):
+            self.slaveMain.geometry("300x250")
+            self.NewLevelObject, self.NewLevelVariable = m.drawRadioButtons(newFrame,CodologieLevel)
+        else:
+            self.slaveMain.geometry("300x340")
+            self.NewLevelObject, self.NewLevelVariable = m.drawRadioButtons(newFrame,StemLevels)
         self.NewTextMessage = m.drawMessage(newFrame,"Enter the New Student's Name")
         self.NewNameObject, self.NewNameVariable = m.drawTextBox(newFrame)
         
@@ -173,10 +208,7 @@ class Handlers:
         self.Createbutton.pack(pady = (0,10))
         newFrame.pack()
         newFrame.update()
-    def Exists(self,name):
-        if(name in self.StudentsIds):
-            return True
-        return False
+
     def FolderCreation(self):
         name = self.NewNameObject.get()
         if(name.strip() != "" and name != "Enter Name Here"):
@@ -185,13 +217,14 @@ class Handlers:
             name = ""
             for part in dummy:
                 name += part[0].upper() + part[1:].lower() + " "
-            if(not self.Exists(name)):
+            if(not name in self.StudentsIds):
                 newid = gdrive.CreateFolder(drive,name,folders[TypeVar.get()])
                 try:
                     self.slave.destroy()
                 except:
                     self.slaveMain.destroy()
-                
+
+                    
                 LevelId = gdrive.CreateFolder(drive,self.NewLevelVariable.get(),newid)
                 DocId = gdrive.CreateFolder(drive,"Documents",LevelId)
                 CodeId = gdrive.CreateFolder(drive,"Code",LevelId)
@@ -202,6 +235,8 @@ class Handlers:
                 Students = GetList(self.StudentsIds)
                 Students.sort()
                 m.UpdateMenu(StudentNames,Students,True)
+
+                    
             else:
                 self.CreateAlert("The Folder Already Exists")
         else:
@@ -212,9 +247,11 @@ class Handlers:
 
         #m.UpdateMenu(GroupNames,Teams,True)
     def CreateAlert(self,message):
-        self.slave = slave = tk.Tk()
-        newFrame = tk.Frame(self.slave, width = 200)
+        self.slave = tk.Toplevel(m.master)
+        self.slave.geometry("200x75")
+        newFrame = tk.Frame(self.slave,width = 200)
         self.slave.title("Alert")
+
         T = tk.Label(self.slave,text = message)
         T.pack(padx = (10,10),pady = (10,10))
 
@@ -227,6 +264,53 @@ class Handlers:
             self.slave.destroy()
         except:
             self.slaveMain.destroy()
+
+        
+        
+    def NewLevel(self):
+        self.slaveLevel = tk.Toplevel(m.master)
+        self.slaveLevel.geometry("300x250")
+        newFrame = tk.Frame(self.slaveLevel,width = 500)
+        self.slaveLevel.title("Enter New Folder Name")
+        self.NewTextMessageLevel = m.drawMessage(newFrame,"Select Student's New Level")
+        CurrentLevels = gdrive.GetFolders(drive,self.studentID)
+        CLevels = GetList(CurrentLevels)
+        CLevels.sort()
+        if(TypeVar.get() == "Buildologie"):
+            self.slaveLevel.geometry("300x280")
+            self.NewLevel2Object, self.NewLevel2Variable = m.drawRadioButtons(newFrame,BuildologieLevel,CLevels)
+        elif(TypeVar.get() == "Codologie"):
+            self.slaveLevel.geometry("300x250")
+            self.NewLevel2Object, self.NewLevel2Variable = m.drawRadioButtons(newFrame,CodologieLevel,CLevels)
+        else:
+            self.slaveLevel.geometry("300x340")
+            self.NewLevel2Object, self.NewLevel2Variable = m.drawRadioButtons(newFrame,StemLevels,CLevels)
+
+        
+        self.CreatebuttonLevel = m.drawButton(newFrame,"Create New Level","h.LevelCreation")
+        self.CreatebuttonLevel.pack(pady = (0,10))
+        newFrame.pack()
+        newFrame.update()
+    def LevelCreation(self):
+
+        newid = self.StudentsIds[self.studentName]
+        try:
+            self.slave.destroy()
+        except:
+            self.slaveLevel.destroy()
+
+        
+        LevelId = gdrive.CreateFolder(drive,self.NewLevel2Variable.get(),newid)
+        DocId = gdrive.CreateFolder(drive,"Documents",LevelId)
+        CodeId = gdrive.CreateFolder(drive,"Code",LevelId)
+        MediaId = gdrive.CreateFolder(drive,"Media",LevelId)
+                         
+        self.LevelIDs = gdrive.GetFolders(drive,self.studentID)
+        self.Levels = GetList(self.LevelIDs)
+        self.Levels.sort()
+        
+        m.UpdateList (StudentLevelObj,StudentLevelVar,self.Levels)
+        self.CreateAlert("New Level Created")
     def ChooseStudent(self,event = None):
 ##        try:
         if(int(StudentNames.curselection()[0]) == 0):
@@ -241,7 +325,7 @@ class Handlers:
             self.studentName = Students[int(StudentNames.curselection()[0])-1]
             self.studentID = self.StudentsIds[self.studentName]
             self.LevelIDs = gdrive.GetFolders(drive,self.studentID)
-            print(self.studentName)
+
             DisplayText.set("Choose Student's Level")
             
 
@@ -264,8 +348,8 @@ class Handlers:
             StudentNames.pack_forget()
             gns.pack_forget()
             
+            newLevelButton.pack(pady = (0,10))
             chooseGroupButton.pack_forget()
-                
 
                 #m.packMenu(GroupFolders,gfs)
                 #GroupFolders.pack()
@@ -407,6 +491,7 @@ StudentNames,gns = m.drawMenu(m.menu,[],True)
 StudentNames.bind("<Double-Button-1>",h.ChooseStudent)
 DisplayText.set("Welcome to MxUpload")
 chooseGroupButton = m.drawButton(m.buttons,"Choose","h.ChooseStudent")
+newLevelButton = m.drawButton(m.buttons,"Create New Level","h.NewLevel")
 ##
 ##
 ##
