@@ -8,12 +8,21 @@ SFID = "0B5wtxWXBa7L8S2dYaEtJMXMxeUk"
 TechID = "16grOWcXkxrjt1JundUKUQoGlPZigPBsOzExyKozcpD8"
 
 def Connect():
+    CurrentDirectory = os.getcwd()
+    parts = CurrentDirectory.split("\\")
+    place = parts.index("Users")
+    path = ""
+    for part in parts[:place+1]:
+        path += part + "\\"
+    path += parts[place+1]+"\\Documents\\IrvineUploadProgram\\src\\MxPiDrive\\"
+
+    os.chdir (path)
     print("Authenticating")
     gauth = GoogleAuth()
 
-    os = platform.platform().split('-')[0]
-    print(os)
-    if(os != "Windows"):
+    CurrentOS = platform.platform().split('-')[0]
+
+    if(CurrentOS != "Windows"):
         gauth.LoadCredentialsFile("./Mx/MxPiDrive/mycreds.txt")
     else:
         gauth.LoadCredentialsFile("./mycreds.txt")
@@ -26,7 +35,7 @@ def Connect():
         gauth.Authorize()
            
 
-    if(os != "Windows"):
+    if(CurrentOS != "Windows"):
         gauth.SaveCredentialsFile("./Mx/MxPiDrive/mycreds.txt")
     else:
         gauth.SaveCredentialsFile("./mycreds.txt")
