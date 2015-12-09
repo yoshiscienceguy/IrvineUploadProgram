@@ -100,25 +100,8 @@ def UploadFile(drive,ParentId,FilePath,FileName):
     file2Upload.SetContentFile(FilePath)
     file2Upload["title"] = FileName
     file2Upload.Upload()
-def GetTeacherID(drive,dayId,Name):
-    file_list = drive.ListFile({"q":"'"+dayId+"' in parents and trashed = false"}).GetList()
-    for file1 in file_list:
-        if(Name == file1['title']):
-            return {file1['title'] : file1['id']}
-            
-def GetClassFolderID(drive,SchoolId,Day):
-    file_list = drive.ListFile({"q":"'"+SchoolId+"' in parents and trashed = false"}).GetList()
-    for file1 in file_list:
-        if(Day in file1['title']):
-            return {file1['title'] : file1['id']}
-            
-def GetSchoolFolderIDs(drive):
-    file_list = drive.ListFile({"q":"'"+SFID+"' in parents and trashed = false"}).GetList()
-    SchoolIds = {}
-    for file1 in file_list:
-        if(not "Technical" in file1['title']):
-            SchoolIds[file1['title'].strip()] = file1['id']
-    return SchoolIds
+
+
 def CreateFolder(drive,FolderName,ParentId):
     newFolder = drive.CreateFile({"title":FolderName,
                                   "mimeType": "application/vnd.google-apps.folder",
