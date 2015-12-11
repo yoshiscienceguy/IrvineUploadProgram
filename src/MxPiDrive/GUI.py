@@ -2,7 +2,7 @@ import Tkinter as tk
 import tkFileDialog
 import gdrive
 import time, platform, os, urllib2, webbrowser
-
+import SSH
 try:
     response = urllib2.urlopen("http://www.google.com",timeout=1)
 except:
@@ -31,6 +31,7 @@ class Menu():
         self.root.minsize(400,200)
         self.root.maxsize(400,500)
         self.root.title("Google Drive Upload")
+        self.firstScreen = tk.Frame(self.root,width= 300)
         self.master = tk.Frame(self.root,width= 300)
         self.menu = tk.Frame(self.root,width= 300)
         self.buttons = tk.Frame (self.root,width= 300)
@@ -127,34 +128,49 @@ class Menu():
         scrollbar.pack(side = tk.RIGHT, fill = tk.Y)
 
 class Handlers:
-
+    def ComputerType(self):
+        global RPiAddress, ComputerType
+        ComputerType = "Raspberry Pi"
+        DisplayText.set("Connecting to the RPi")
+        RPiAddress = SSH.Search()
+        if(RPiAddress == 0):
+            self.CreateAlert("No Raspberries Found\nExiting")
+            quit()
+        RaspberryPiDevice.pack_forget()
+        m.firstScreen.pack_forget()
+        TypeObj.pack()
+    def ComputerType2(self):
+        ComputerType = "Windows"
+        RaspberryPiDevice.pack_forget()
+        m.firstScreen.pack_forget()
+        TypeObj.pack()
     def StudentLevel(self,p,a,c):
 
-        try:
 
-            if(StudentLevelVar.get() == "Choose One"):
-                return
-            DisplayText.set("Current Selected: "+ self.studentName+"\n\nSelect Student's Project\n\n")
-            m.packMenu(StudentNames,gns)
 
-            UploadFolderID = self.LevelIDs[StudentLevelVar.get()]
+        if(StudentLevelVar.get() == "Choose One"):
+            return
+        DisplayText.set("Current Selected: "+ self.studentName+"\n\nSelect Student's Project\n\n")
+        m.packMenu(StudentNames,gns)
 
-            self.Projects = gdrive.GetFolders(drive,UploadFolderID)
-            CodeFolder = gdrive.GetFiles(drive,self.Projects["Code"])
-            self.CodeFolderId = self.Projects["Code"]
-            Codes = GetList(CodeFolder)
-            m.UpdateMenu(StudentNames,Codes,False)
-            os = platform.platform().split('-')[0]
-            if(os == "Windows"):
-               TechnicalReport.pack() 
+        UploadFolderID = self.LevelIDs[StudentLevelVar.get()]
 
-            ChooseUploadFolder.pack()
-            ChooseDownloadCode.pack(anchor = tk.W)
+        self.Projects = gdrive.GetFolders(drive,UploadFolderID)
+        CodeFolder = gdrive.GetFiles(drive,self.Projects["Code"])
+        self.CodeFolderId = self.Projects["Code"]
 
-            newLevelButton.pack_forget()
-        except:
-            print("something")
-            pass
+
+        Codes = GetList(CodeFolder)
+        m.UpdateMenu(StudentNames,Codes,False)
+        os = platform.platform().split('-')[0]
+        if(os == "Windows"):
+           TechnicalReport.pack() 
+
+        ChooseUploadFolder.pack()
+        ChooseDownloadCode.pack(anchor = tk.W)
+
+        newLevelButton.pack_forget()
+
 
     def StudentType(self,p,a,c):
         #used
@@ -383,12 +399,50 @@ class Handlers:
                 webbrowser.open(url,new = 2)
         except:
             self.CreateAlert("Please Select a Project")
+    def SelectProjectUpload(self):
+        projectName = self.RaspProjects[self.RPiProjectsMenu.curselection()[0]]
+        location = self.RaspProjectsLocation[projectName]
+        self.slaveLevel2.destroy()
+        path = ""
+        if(location == ""):
+            path = "/home/pi"
+        else:
+            path = "home/pi/Desktop"
+        
+        SSH.DownloadFile(RPiAddress,path,projectName)
+        gdrive.UploadFile (drive,self.CodeFolderId,os.getcwd()+"\\"+projectName,projectName)
+        print('Upload \"'+ projectName+'\" Successful')
+        self.CreateAlert('Upload \"'+ projectName+'\" Successful')
 
+        CodeFolder = gdrive.GetFiles(drive,self.Projects["Code"])
+
+        Codes = GetList(CodeFolder)
+        m.UpdateMenu(StudentNames,Codes,False)
+        DisplayText.set("Upload Sucessful")
     def UploadButton(self):
-        try:
 
-            #Folder2Upload = self.TeamFolder[Folders[int(GroupFolders.curselection()[0])]]
-            #Folder2Upload = self.TeamFolder['Code']
+
+    #Folder2Upload = self.TeamFolder[Folders[int(GroupFolders.curselection()[0])]]
+    #Folder2Upload = self.TeamFolder['Code']
+    
+        if(ComputerType == "Raspberry Pi"):
+            #UploadFile(RPiAddress,FileName)
+            self.slaveLevel2 = tk.Toplevel(m.master)
+            self.slaveLevel2.geometry("300x250")
+            newFrame = tk.Frame(self.slaveLevel2,width = 500)
+            self.buttonFrame = tk.Frame(self.slaveLevel2,width =500)
+            self.slaveLevel2.title("Enter New Folder Name")
+            self.RaspProjectsLocation,self.RaspProjects = SSH.SearchRPi(RPiAddress)
+            self.RaspProjects.sort()
+            self.RPiProjectsMenu,scrollbar = m.drawMenu(newFrame,self.RaspProjects,False)
+            m.packMenu(self.RPiProjectsMenu,scrollbar)
+            self.selectProjectButton = m.drawButton(self.buttonFrame,"Select Project","h.SelectProjectUpload")
+            self.selectProjectButton.pack()
+            newFrame.pack()
+            self.buttonFrame.pack()
+            
+            
+        else:
             try:
                 options = {}
                 options['defaultextension'] = '.py'
@@ -426,26 +480,38 @@ class Handlers:
                 DisplayText.set("Upload Sucessful")
                 #os.remove(path)
                 #self.TechnicalReport(True)
-            except:
+            except: 
                 self.CreateAlert("No File Selected")
                 
                 
-        except:
-            self.CreateAlert("Please Select a Folder")
+
 
 
     def DownloadButton(self,event = None):
-        try:
+##        try:
             #Folder2Download = self.TeamFolder['Code']
-            path = '/home/pi'
-            Files = gdrive.GetFiles(drive,self.CodeFolderId)
-            FileNames = GetList(Files)
             
-            FileName = FileNames[StudentNames.curselection()[0]]
-            FileID = Files[FileName ]
+            
 
-            if(FileID and FileName):
-                gdrive.DownloadFile(drive,FileID,FileName)
+        path = '/home/pi'
+        Files = gdrive.GetFiles(drive,self.CodeFolderId)
+        FileNames = GetList(Files)
+        
+        FileName = FileNames[StudentNames.curselection()[0]]
+        FileID = Files[FileName]
+
+        if(FileID and FileName):
+            gdrive.DownloadFile(drive,FileID,FileName)
+            if(ComputerType == "Raspberry Pi"):
+                #UploadFile(RPiAddress,FileName)
+                filepath = os.getcwd()+"\\"+FileName
+                SSH.UploadFile(RPiAddress,filepath,FileName)
+                print('Download \"'+ FileName+'\" Successful')
+                self.CreateAlert("File Downloaded! Look for it on the Raspberry Pi Desktop")
+                DisplayText.set("Download Sucessful to the Raspberry Pi")
+
+            
+            else:
                 osType = platform.platform().split("-")[0]
                 if(osType!= "Windows"):
                     DesktopPath= "/home/pi/Desktop/"
@@ -460,11 +526,11 @@ class Handlers:
                 print('Download \"'+ FileName+'\" Successful')
                 self.CreateAlert("File Downloaded! Look for it on Desktop")
                 DisplayText.set("Download Sucessful")
-                    
-            else:
-                self.CreateAlert("File Does not Exist")
-        except:
-            self.CreateAlert("Please Select a Folder")
+            
+        else:
+            self.CreateAlert("File Does not Exist")
+##        except:
+##            self.CreateAlert("Please Select a Folder")
 
             
 def GetList(tup,ex = []):
@@ -481,15 +547,31 @@ drive = gdrive.Connect()
 ##
 ##
 ##
+
 folders = gdrive.GetFolders(drive)
+osType = platform.platform().split("-")[0]
+
+DisplayText = m.drawMessage(m.master,"Welcome to MxUpload\n\nPlease Choose the device your files are on")
 TypeObj,TypeVar = m.drawDropDown(m.master,"h.StudentType",GetList(folders),True)
+RPiAddress = 0
+ComputerType = "Windows"
+if(osType== "Windows"):
+    TypeObj.pack_forget()
+    RaspberryPiDevice = m.drawButton(m.firstScreen,"Raspberry Pi","h.ComputerType")
+    RaspberryPiDevice.pack()
+    WindowsDevice = m.drawButton(m.firstScreen, "Windows","h.ComputerType2")
+    WindowsDevice.pack()
+    m.firstScreen.pack()
+
+
+
 StudentLevelObj,StudentLevelVar = m.drawDropDown(m.master,"h.StudentLevel",[""])
 StudentLevelObj.pack_forget()
-DisplayText = m.drawMessage(m.master,"Please Choose a School")
+DisplayText.set("Please Choose a School")
 StudentNames,gns = m.drawMenu(m.menu,[],True)
 
 StudentNames.bind("<Double-Button-1>",h.ChooseStudent)
-DisplayText.set("Welcome to MxUpload")
+DisplayText.set("")
 chooseGroupButton = m.drawButton(m.buttons,"Choose","h.ChooseStudent")
 newLevelButton = m.drawButton(m.buttons,"Create New Level","h.NewLevel")
 ##
