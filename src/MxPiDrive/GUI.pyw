@@ -28,7 +28,7 @@ BuildologieLevel = [("Buildologie","Buildologie - (Tot-Bot)"),
 class Menu():
     def __init__(self):
         self.root = tk.Tk()
-        self.root.iconbitmap(os.path.expanduser("~")+"\\Documents\\IrvineUploadProgram\\src\\logo.ico")
+        self.root.iconbitmap(os.path.expanduser("~")+"\\IrvineUploadProgram\\src\\logo.ico")
         self.root.minsize(400,200)
         self.root.maxsize(400,500)
         self.root.title("Google Drive Upload")
