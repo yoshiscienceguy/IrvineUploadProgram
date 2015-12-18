@@ -41,20 +41,20 @@ def Ping(ip,count = 0):
     global goodAddresses
     if(count > 5):
 
-        return
+        return 0
     try:
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW 
-        info = subprocess.Popen("ping "+ip+" -n 1",startupinfo = si,stdout=subprocess.PIPE)
+        info = subprocess.Popen("ping "+ip+" -n 1 -w 5",startupinfo = si,stdout=subprocess.PIPE)
         (output,err) = info.communicate()
         messages = output.split("\n")
         if("unreachable" in messages[2]):
-            return
+            return 0
         sucess = int(messages[5].strip().split("=")[-1].split()[0])
         if(sucess == 0):
             
             goodAddresses.append(ip)
-            return
+            return 1
     except:
         Ping(ip,count+1)
 
@@ -67,6 +67,10 @@ def Search():
     print("Scanning Ip's... Please be patient, this might take a while!")
     for i in range(254):
         newAddress = address[:address.rfind(".")+1]+str(i+2)
+##        print(newAddress)
+##        print(Ping(newAddress))
+##        if(Ping(newAddress) == 1):
+##            break
         threads.append(threading.Thread(target = Ping,args =(newAddress,)))
     for thread1 in threads:
         thread1.start()
@@ -75,13 +79,15 @@ def Search():
     print(goodAddresses)
     RPiAddress = 0
     for address in goodAddresses:
-        
-        if("raspberry" in socket.gethostbyaddr (address)[0]):
-            return address
+        try:
+            if("raspberry" in socket.gethostbyaddr (address)[0]):
+                return address
+        except:
+            pass
              
     print("No raspberries found")
     return 0
-        
+
 def SearchRPi(Address):
     if(Address != 0):
                                   
@@ -117,8 +123,10 @@ def DownloadFile(Address,Path,Filename):
         transport.connect(username = "pi", password = "raspberry")
         sftp = paramiko.SFTPClient.from_transport(transport)
         # Download
-        filepath = Path+"/"+Filename
-        localpath = os.getcwd()+"/"+Filename
+        filepath = "/"+Path+"/"+Filename
+        print(filepath)
+        localpath = os.getcwd()+"\\"+Filename
+        print(localpath)
         sftp.get(filepath, localpath)
 
         # Close
@@ -136,8 +144,11 @@ def UploadFile(Address,Path,Filename):
         sftp = paramiko.SFTPClient.from_transport(transport)
 
         # Upload
+        
         filepath = '/home/pi/Desktop/'+Filename
+        print(filepath)
         localpath = Path
+        print(Path)
         sftp.put(localpath, filepath)
         # Close
         sftp.close()

@@ -28,12 +28,15 @@ BuildologieLevel = [("Buildologie","Buildologie - (Tot-Bot)"),
 class Menu():
     def __init__(self):
         self.root = tk.Tk()
+        self.root.iconbitmap(os.path.expanduser("~")+"\\Documents\\IrvineUploadProgram\\src\\logo.ico")
         self.root.minsize(400,200)
         self.root.maxsize(400,500)
         self.root.title("Google Drive Upload")
+        self.firstoption = tk.Frame(self.root,width = 300)
+        self.secondoption = tk.Frame(self.root,width = 300,relief = tk.RIDGE,borderwidth = 3)
         self.firstScreen = tk.Frame(self.root,width= 300)
         self.master = tk.Frame(self.root,width= 300)
-        self.menu = tk.Frame(self.root,width= 300)
+        self.menu = tk.Frame(self.root,width= 300,height = 2,relief = tk.SUNKEN,borderwidth = 1)
         self.buttons = tk.Frame (self.root,width= 300)
         self.master.pack()
         #tk.mainloop()
@@ -50,10 +53,17 @@ class Menu():
         return DropDown , AssociatedVariable
         
         
-    def drawButton(self,frame,toSay,functionName):
-        submit = tk.Button(frame, text = toSay,command = eval(functionName))
+    def drawButton(self,frame,toSay,functionName,picName = None):
+        submit = tk.Button(frame, text = toSay,command = eval(functionName),borderwidth = 4,relief =tk.GROOVE)
+        if(picName):
+            photo = tk.PhotoImage (file="ICONS//"+picName+".gif")
+            submit.config(image = photo)
+            return submit,photo
 
-        return submit
+        else: 
+        
+
+            return submit
     
     def drawRadioButtons(self,frame,options,excluded = None):
         
@@ -95,11 +105,14 @@ class Menu():
             listbox.insert(tk.END,item)
 
         return listbox,scrollbar
-    def drawMessage(self,frame,toSay):
+    def drawMessage(self,frame,toSay,options = None):
         self.vartoSay = tk.StringVar()
         textbox = tk.Label(frame,textvariable = self.vartoSay, fg = "red",font = ("Helvetica",10))
         self.vartoSay.set(toSay)
-        textbox.pack(pady = 10)
+        if(options):
+            textbox.pack(pady = 10,side = options)
+        else:
+            textbox.pack(pady = 10,)
         return self.vartoSay
     
     def drawTextBox (self,frame):
@@ -131,28 +144,58 @@ class Handlers:
     def ComputerType(self):
         global RPiAddress, ComputerType
         ComputerType = "Raspberry Pi"
-        DisplayText.set("Connecting to the RPi")
+        DisplayText2.set("Searching for the Raspberry Pi")
+        m.root.update()
         RPiAddress = SSH.Search()
         if(RPiAddress == 0):
-            self.CreateAlert("No Raspberries Found\nExiting")
+            for i in range(5):
+                DisplayText2.set("Raspberry not Found... \n Exiting in "+str(5-i)+" seconds")
+                time.sleep(1)
+                m.root.update()
             quit()
         RaspberryPiDevice.pack_forget()
         m.firstScreen.pack_forget()
-        TypeObj.pack()
+        
+        self.message0 = m.drawMessage(m.firstoption,"Student Type:  ",tk.LEFT)
+        self.message1 = m.drawMessage(m.secondoption,"Level:  ",tk.LEFT)
+        TypeObj.pack(side = tk.LEFT)
+        m.firstoption.pack()
+        m.menu.pack_forget()
+        self.message2 = m.drawMessage(m.menu,"Choose Student:  ",tk.LEFT)
+        DisplayText.set("Raspberry Pi found at: " + RPiAddress +"\nConnected!"+"\n\nSelect Student's type")
     def ComputerType2(self):
         ComputerType = "Windows"
         RaspberryPiDevice.pack_forget()
         m.firstScreen.pack_forget()
-        TypeObj.pack()
+        self.message0 = m.drawMessage(m.firstoption,"Student Type:  ",tk.LEFT)
+       
+        TypeObj.pack(side = tk.LEFT)
+        DisplayText.set("Select Student's type")
+        m.firstoption.pack()
+        m.menu.pack_forget()
+        self.message2 = m.drawMessage(m.menu,"Choose Student:  ",tk.LEFT)
+        self.message1 = m.drawMessage(m.secondoption,"Level:  ",tk.LEFT)
     def StudentLevel(self,p,a,c):
 
 
-
+        
         if(StudentLevelVar.get() == "Choose One"):
             return
         DisplayText.set("Current Selected: "+ self.studentName+"\n\nSelect Student's Project\n\n")
-        m.packMenu(StudentNames,gns)
 
+        m.firstoption.pack_forget()
+        m.secondoption.pack_forget()
+        m.firstoption.pack(pady = 00)
+        m.secondoption.pack(pady = 0)
+        m.secondoption.config(borderwidth = 0,relief = tk.FLAT)
+        m.buttons.pack_forget()
+        m.menu.pack_forget()
+        m.menu.pack(pady = (0,10))
+        m.buttons.pack()
+        m.root.update()
+        self.message2.set("Select Project: ")
+        m.packMenu(StudentNames,gns)
+        m.buttons.pack()
         UploadFolderID = self.LevelIDs[StudentLevelVar.get()]
 
         self.Projects = gdrive.GetFolders(drive,UploadFolderID)
@@ -180,19 +223,28 @@ class Handlers:
             StudentNames.bind("<Double-Button-1>",self.ChooseStudent)
             
             DisplayText.set("Select Student's Name")
+            self.message2.set("Select Student: ")
             os = platform.platform().split('-')[0]
             if(os == "Windows"):
                TechnicalReport.pack_forget() 
-
+            
             ChooseUploadFolder.pack_forget()
             ChooseDownloadCode.pack_forget()
-            StudentLevelObj.pack_forget()
+            chooseGroupButton.pack_forget()
+            m.buttons.pack_forget()
+            m.menu.pack_forget()
+            m.secondoption.pack_forget()
             self.school = TypeVar.get()
 
             self.StudentsIds = gdrive.GetFolders(drive,folders[TypeVar.get()])
-        
-            m.packMenu(StudentNames,gns)
+            m.menu.pack_forget()
+            m.menu.pack()
             
+            
+            m.packMenu(StudentNames,gns)
+                    
+            StudentNames.pack(side = tk.LEFT)
+            gns.pack(side = tk.LEFT)
             Students = GetList(self.StudentsIds)
             Students.sort()
             m.UpdateMenu(StudentNames,Students,True)
@@ -338,17 +390,26 @@ class Handlers:
             StudentNames.bind("<Double-Button-1>",h.DownloadButton)
             Students = GetList(self.StudentsIds)
             Students.sort()
+            m.menu.pack_forget()
             self.studentName = Students[int(StudentNames.curselection()[0])-1]
             self.studentID = self.StudentsIds[self.studentName]
             self.LevelIDs = gdrive.GetFolders(drive,self.studentID)
 
-            DisplayText.set("Choose Student's Level")
+            DisplayText.set("\n\nCurrent Student : " + self.studentName+ "\n\nChoose Student's Level")
             
 
             self.Levels = GetList(self.LevelIDs)
             self.Levels.sort()
-
-            StudentLevelObj.pack()
+            
+            self.message1.set("Level: ")
+            StudentLevelObj.pack(side = tk.LEFT)
+            m.firstoption.pack_forget()
+            m.buttons.pack_forget()
+            m.firstoption.pack(pady = 20)
+            m.secondoption.pack(pady = (100,40))
+            
+            m.buttons.pack(pady = 20)
+            
             m.UpdateList (StudentLevelObj,StudentLevelVar,self.Levels)
             
             self.UploadFolderId = self.LevelIDs[self.Levels[0]]
@@ -365,6 +426,7 @@ class Handlers:
             gns.pack_forget()
             
             newLevelButton.pack(pady = (0,10))
+            
             chooseGroupButton.pack_forget()
 
                 #m.packMenu(GroupFolders,gfs)
@@ -408,8 +470,10 @@ class Handlers:
             path = "/home/pi"
         else:
             path = "home/pi/Desktop"
-        
+        print(path)
+        print(projectName)
         SSH.DownloadFile(RPiAddress,path,projectName)
+        print(os.getcwd()+"\\"+projectName + "<----------")
         gdrive.UploadFile (drive,self.CodeFolderId,os.getcwd()+"\\"+projectName,projectName)
         print('Upload \"'+ projectName+'\" Successful')
         self.CreateAlert('Upload \"'+ projectName+'\" Successful')
@@ -540,10 +604,10 @@ def GetList(tup,ex = []):
         if(not thing in ex):
             toreturn.append(thing)
     return toreturn
+
+drive = gdrive.Connect()
 m = Menu()
 h = Handlers()
-drive = gdrive.Connect()
-
 ##
 ##
 ##
@@ -551,25 +615,27 @@ drive = gdrive.Connect()
 folders = gdrive.GetFolders(drive)
 osType = platform.platform().split("-")[0]
 
-DisplayText = m.drawMessage(m.master,"Welcome to MxUpload\n\nPlease Choose the device your files are on")
-TypeObj,TypeVar = m.drawDropDown(m.master,"h.StudentType",GetList(folders),True)
+DisplayText = m.drawMessage(m.master,"Welcome to MxUpload")
+
+TypeObj,TypeVar = m.drawDropDown(m.firstoption,"h.StudentType",GetList(folders),True)
 RPiAddress = 0
 ComputerType = "Windows"
 if(osType== "Windows"):
+    DisplayText2 = m.drawMessage(m.firstScreen,"Welcome to MxUpload\n\nPlease Choose the device your files are on")
     TypeObj.pack_forget()
-    RaspberryPiDevice = m.drawButton(m.firstScreen,"Raspberry Pi","h.ComputerType")
-    RaspberryPiDevice.pack()
-    WindowsDevice = m.drawButton(m.firstScreen, "Windows","h.ComputerType2")
-    WindowsDevice.pack()
+    RaspberryPiDevice,image = m.drawButton(m.firstScreen,"Raspberry Pi","h.ComputerType","rpiLogo")
+    RaspberryPiDevice.pack(padx = 20,pady=20)
+    WindowsDevice,image2 = m.drawButton(m.firstScreen, "Windows","h.ComputerType2","windowsLogo")
+    WindowsDevice.pack(padx = 20,pady=(0,20))
     m.firstScreen.pack()
 
 
 
-StudentLevelObj,StudentLevelVar = m.drawDropDown(m.master,"h.StudentLevel",[""])
+StudentLevelObj,StudentLevelVar = m.drawDropDown(m.secondoption,"h.StudentLevel",[""])
 StudentLevelObj.pack_forget()
-DisplayText.set("Please Choose a School")
 StudentNames,gns = m.drawMenu(m.menu,[],True)
-
+StudentNames.pack_forget()
+gns.pack_forget()
 StudentNames.bind("<Double-Button-1>",h.ChooseStudent)
 DisplayText.set("")
 chooseGroupButton = m.drawButton(m.buttons,"Choose","h.ChooseStudent")
@@ -582,7 +648,7 @@ TechnicalReport = m.drawButton(m.buttons,"Technical Report", "h.TechnicalReport"
 ChooseUploadFolder = m.drawButton(m.buttons,"Upload Code","h.UploadButton")
 ChooseDownloadCode = m.drawButton(m.buttons,"Download Code", "h.DownloadButton")
 ##
-m.menu.pack()
+m.menu.pack(pady=20)
 ##m.buttons.pack ()
 tk.mainloop()
 
