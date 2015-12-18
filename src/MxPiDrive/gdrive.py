@@ -14,7 +14,7 @@ def Connect():
     path = ""
     for part in parts[:place+1]:
         path += part + "\\"
-    path += parts[place+1]+"\\Documents\\IrvineUploadProgram\\src\\MxPiDrive\\"
+    path += parts[place+1]+"\\IrvineUploadProgram\\src\\MxPiDrive\\"
 
     os.chdir (path)
     print("Authenticating")

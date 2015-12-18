@@ -1,2 +1,2 @@
-cd C:/Users/%USERNAME%/Documents/IrvineUploadProgram
+cd C:/Users/%USERNAME%/IrvineUploadProgram
 git pull
