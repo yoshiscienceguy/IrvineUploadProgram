@@ -692,7 +692,7 @@ CurrentImage = GIFS[names[CurrentGifNumber]]
 name =names[CurrentGifNumber]
 
   
-button = tk.Button(m.gifsection,relief = FLAT,command = nextAnimation,image=CurrentImage[0])  # display first frame initially
+button = tk.Button(m.gifsection,relief = tk.FLAT,command = nextAnimation,image=CurrentImage[0])  # display first frame initially
 button.pack()
 startAnimation()
 
