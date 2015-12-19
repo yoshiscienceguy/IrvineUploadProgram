@@ -2,7 +2,7 @@ import Tkinter as tk
 import thread,time
 GIFS = {}
 Status = True
-names = ["walking"]#,"BreakDance","ChickenDance","Dance","HipHop","Samba","Swing"]
+names = ["walking","ChickenDance"]#,"BreakDance","Dance","HipHop","Samba","Swing"]
 doneLoading = False
 
 NumberofGifs = len(GIFS)
@@ -95,12 +95,9 @@ def GetGif():
     CurrentImage=GIFS[names[0]]
     NumberofGifs = len(GIFS)
         
+
         
-def check():
-    if(doneLoading):
-        startAnimation()
-    else:
-        root.after(5000,check)
+
 
 def Start(mroot):
     global button,root
@@ -110,9 +107,8 @@ def Start(mroot):
     button = tk.Button(root,relief = tk.FLAT,command = nextAnimation)  # display first frame initially
     button.pack()
 
-    thread.start_new_thread(GetGif,())
-
-    check()
+    GetGif()
+    startAnimation()
 
 ##    
 ##root = tk.Tk()
