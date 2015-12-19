@@ -1,3 +1,16 @@
+#!/usr/bin/env python
+'''
+__author__ = "Fernando de Paz"
+__copyright__ = "Copyright 2015, Mathobotix"
+
+__version__ = "3.3.5"
+__email__ = "f.depaz@hotmail.com"
+__github__ = "yoshiscienceguy"
+
+
+
+
+'''
 import sys
 sys.modules[__name__].__dict__.clear()
 
@@ -516,7 +529,7 @@ class Handlers:
             try:
                 options = {}
                 options['defaultextension'] = '.py'
-                options['filetypes'] = [('Python Files', '.py'),('All Files', '.*')]
+                options['filetypes'] = [('Programming Files', '.py .io .txt .sb2'),('All Files', '.*')]
                 osType = platform.platform().split("-")[0]
                 if(osType!= "Windows"):
                     options['initialdir'] = '/home/pi/Desktop'
@@ -532,10 +545,7 @@ class Handlers:
 
                 
                 parts = path.split("/")
-                FileName = parts[-1].split(".")[0]
-
-
-                FileName += ".py"
+                FileName = parts[-1]
 
 
                 #path = "C:\Users\Fernando\Desktop\Anaheim GoogleDrive\test.txt"
