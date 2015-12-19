@@ -655,7 +655,7 @@ def updatePicture(frame_num):
         return
         
     else:
-        root.after(ms_delay, updatePicture, frame_num)
+        m.root.after(ms_delay, updatePicture, frame_num)
 def startAnimation():
     ms_delay = 1000 // len(CurrentImage)
     updatePicture(0)
@@ -666,8 +666,7 @@ def nextAnimation():
     CurrentGifNumber += 1
     if(CurrentGifNumber >= NumberofGifs):
         CurrentGifNumber = 0
-    print(CurrentGifNumber)
-    print(names[CurrentGifNumber])
+
     CurrentImage = GIFS[names[CurrentGifNumber]]
     Status = False
     updatePicture(0)
