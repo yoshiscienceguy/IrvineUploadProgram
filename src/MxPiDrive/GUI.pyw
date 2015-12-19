@@ -1,7 +1,7 @@
 import Tkinter as tk
 import tkFileDialog
 import gdrive
-import time, platform, os, urllib2, webbrowser
+import time, platform, os, urllib2, webbrowser, thread
 import SSH
 try:
     response = urllib2.urlopen("http://www.google.com",timeout=1)
@@ -636,9 +636,6 @@ class AnimatedGif(object):
 def updatePicture(frame_num):
     global Status
     ms_delay = 1000 // len(CurrentImage)
-    print(names[CurrentGifNumber])
-    print(frame_num)
-    
 
     try:
         button.configure(image=CurrentImage[frame_num])
@@ -678,11 +675,18 @@ h = Handlers()
 GIFS = {}
 Status = True
 names = ["BreakDance","ChickenDance","Dance","HipHop","Samba","Swing"]
+def GetGif(name):
+    image_file_path = "ICONS/"+name+".gif"
+    GIFS[name] = AnimatedGif(image_file_path)
+    
+Threads = []
 for name in names:
     
-    image_file_path = "ICONS/"+name+".gif"
-    ani_img = AnimatedGif(image_file_path)
-    GIFS[name]=ani_img
+    Threads.append(threading.Thread(target = GetGif,args = (name,)))
+for thread1 in Threads:
+    thread1.start()
+for thread1 in Threads:
+    thread1.join()
 
 
 NumberofGifs = len(GIFS)
