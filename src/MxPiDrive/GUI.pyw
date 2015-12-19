@@ -36,9 +36,11 @@ class Menu():
         self.secondoption = tk.Frame(self.root,width = 300,relief = tk.RIDGE,borderwidth = 3)
         self.firstScreen = tk.Frame(self.root,width= 300)
         self.master = tk.Frame(self.root,width= 300)
+        self.gifsection = tk.Frame(self.root,width = 300)
         self.menu = tk.Frame(self.root,width= 300,height = 2,relief = tk.SUNKEN,borderwidth = 1)
         self.buttons = tk.Frame (self.root,width= 300)
         self.master.pack()
+        self.gifsection.pack()
         #tk.mainloop()
         
     def drawDropDown(self,frame,functionName,listDisplay,Default = False):
@@ -605,9 +607,98 @@ def GetList(tup,ex = []):
             toreturn.append(thing)
     return toreturn
 
+
+
+class AnimatedGif(object):
+    """ Animated GIF Image Container. """
+    def __init__(self, image_file_path):
+        self.image_file_path = image_file_path
+        self._frames = []
+        self._load()
+
+    def __len__(self):
+        return len(self._frames)
+
+    def __getitem__(self, frame_num):
+        return self._frames[frame_num]
+
+    def _load(self):
+        """ Read in all the frames of a multi-frame gif image. """
+        while True:
+            frame_num = len(self._frames)  # number of next frame to read
+            try:
+                frame = PhotoImage(file=self.image_file_path,
+                                   format="gif -index {}".format(frame_num))
+            except TclError:
+                break
+            self._frames.append(frame)
+
+def updatePicture(frame_num):
+    global Status
+    ms_delay = 1000 // len(CurrentImage)
+    print(names[CurrentGifNumber])
+    print(frame_num)
+    
+
+    try:
+        button.configure(image=CurrentImage[frame_num])
+    except:
+        
+        button.configure(image=CurrentImage[0])
+    button.pack()
+    frame_num += 1
+    if(frame_num >= len(CurrentImage)):
+        frame_num = 0
+        
+    if(Status == False):
+        Status = True
+        return
+        
+    else:
+        root.after(ms_delay, updatePicture, frame_num)
+def startAnimation():
+    ms_delay = 1000 // len(CurrentImage)
+    updatePicture(0)
+
+def nextAnimation():
+    global CurrentImage, CurrentGifNumber,Status
+    name =names[CurrentGifNumber]
+    CurrentGifNumber += 1
+    if(CurrentGifNumber >= NumberofGifs):
+        CurrentGifNumber = 0
+    print(CurrentGifNumber)
+    print(names[CurrentGifNumber])
+    CurrentImage = GIFS[names[CurrentGifNumber]]
+    Status = False
+    updatePicture(0)
+
 drive = gdrive.Connect()
 m = Menu()
 h = Handlers()
+
+GIFS = {}
+Status = True
+names = ["BreakDance","ChickenDance","Dance","HipHop","Samba","Swing"]
+for name in names:
+    
+    image_file_path = "ICONS/"+name+".gif"
+    ani_img = AnimatedGif(image_file_path)
+    GIFS[name]=ani_img
+
+
+NumberofGifs = len(GIFS)
+CurrentGifNumber = 0
+CurrentImage = GIFS[names[CurrentGifNumber]]
+name =names[CurrentGifNumber]
+
+  
+button = Button(m.gifsection,relief = FLAT,command = nextAnimation,image=CurrentImage[0])  # display first frame initially
+button.pack()
+startAnimation()
+
+
+
+
 ##
 ##
 ##
