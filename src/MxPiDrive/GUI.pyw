@@ -627,9 +627,9 @@ class AnimatedGif(object):
         while True:
             frame_num = len(self._frames)  # number of next frame to read
             try:
-                frame = PhotoImage(file=self.image_file_path,
+                frame = tk.PhotoImage(file=self.image_file_path,
                                    format="gif -index {}".format(frame_num))
-            except TclError:
+            except tk.TclError:
                 break
             self._frames.append(frame)
 
@@ -692,7 +692,7 @@ CurrentImage = GIFS[names[CurrentGifNumber]]
 name =names[CurrentGifNumber]
 
   
-button = Button(m.gifsection,relief = FLAT,command = nextAnimation,image=CurrentImage[0])  # display first frame initially
+button = tk.Button(m.gifsection,relief = FLAT,command = nextAnimation,image=CurrentImage[0])  # display first frame initially
 button.pack()
 startAnimation()
 
