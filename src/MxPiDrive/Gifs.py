@@ -41,8 +41,10 @@ def updatePicture(frame_num):
         global Status
         ms_delay = 1000 // len(CurrentImage)
         
-
-        button.configure(image=CurrentImage[frame_num])
+        try:
+            button.configure(image=CurrentImage[frame_num])
+        except:
+            button.configure(image=CurrentImage[0])
 
         
         frame_num += 1
