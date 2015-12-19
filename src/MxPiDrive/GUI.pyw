@@ -639,10 +639,12 @@ if(osType== "Windows"):
     WindowsDevice,image2 = m.drawButton(m.firstScreen, "Windows","h.ComputerType2","windowsLogo")
     WindowsDevice.pack(padx = 20,pady=(0,20))
     m.firstScreen.pack()
-
-time.sleep(.5)
-Gifs.Start(m.root)
-
+try:
+    time.sleep(.5)
+    Gifs.Start(m.root)
+    time.sleep(.5)
+except:
+    pass
 
 StudentLevelObj,StudentLevelVar = m.drawDropDown(m.secondoption,"h.StudentLevel",[""])
 StudentLevelObj.pack_forget()
