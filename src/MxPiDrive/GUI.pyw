@@ -1,8 +1,12 @@
+import sys
+sys.modules[__name__].__dict__.clear()
+
 import Tkinter as tk
 import tkFileDialog
-import gdrive
-import time, platform, os, urllib2, webbrowser, thread
-import SSH
+import gdrive , Gifs , SSH
+import time, platform, os, urllib2, webbrowser, threading
+
+
 try:
     response = urllib2.urlopen("http://www.google.com",timeout=1)
 except:
@@ -30,7 +34,7 @@ class Menu():
         self.root = tk.Tk()
         self.root.iconbitmap(os.path.expanduser("~")+"\\IrvineUploadProgram\\src\\logo.ico")
         self.root.minsize(400,200)
-        self.root.maxsize(400,500)
+        self.root.maxsize(400,700)
         self.root.title("Google Drive Upload")
         self.firstoption = tk.Frame(self.root,width = 300)
         self.secondoption = tk.Frame(self.root,width = 300,relief = tk.RIDGE,borderwidth = 3)
@@ -209,10 +213,10 @@ class Handlers:
         m.UpdateMenu(StudentNames,Codes,False)
         os = platform.platform().split('-')[0]
         if(os == "Windows"):
-           TechnicalReport.pack() 
+           TechnicalReport.pack(pady = 10) 
 
-        ChooseUploadFolder.pack()
-        ChooseDownloadCode.pack(anchor = tk.W)
+        ChooseUploadFolder.pack(pady = 10)
+        ChooseDownloadCode.pack(pady = 10,anchor = tk.W)
 
         newLevelButton.pack_forget()
 
@@ -609,97 +613,10 @@ def GetList(tup,ex = []):
 
 
 
-class AnimatedGif(object):
-    """ Animated GIF Image Container. """
-    def __init__(self, image_file_path):
-        self.image_file_path = image_file_path
-        self._frames = []
-        self._load()
-
-    def __len__(self):
-        return len(self._frames)
-
-    def __getitem__(self, frame_num):
-        return self._frames[frame_num]
-
-    def _load(self):
-        """ Read in all the frames of a multi-frame gif image. """
-        while True:
-            frame_num = len(self._frames)  # number of next frame to read
-            try:
-                frame = tk.PhotoImage(file=self.image_file_path,
-                                   format="gif -index {}".format(frame_num))
-            except tk.TclError:
-                break
-            self._frames.append(frame)
-
-def updatePicture(frame_num):
-    global Status
-    ms_delay = 1000 // len(CurrentImage)
-
-    try:
-        button.configure(image=CurrentImage[frame_num])
-    except:
-        
-        button.configure(image=CurrentImage[0])
-    button.pack()
-    frame_num += 1
-    if(frame_num >= len(CurrentImage)):
-        frame_num = 0
-        
-    if(Status == False):
-        Status = True
-        return
-        
-    else:
-        m.root.after(ms_delay, updatePicture, frame_num)
-def startAnimation():
-    ms_delay = 1000 // len(CurrentImage)
-    updatePicture(0)
-
-def nextAnimation():
-    global CurrentImage, CurrentGifNumber,Status
-    name =names[CurrentGifNumber]
-    CurrentGifNumber += 1
-    if(CurrentGifNumber >= NumberofGifs):
-        CurrentGifNumber = 0
-
-    CurrentImage = GIFS[names[CurrentGifNumber]]
-    Status = False
-    updatePicture(0)
 
 drive = gdrive.Connect()
 m = Menu()
 h = Handlers()
-
-GIFS = {}
-Status = True
-names = ["BreakDance","ChickenDance","Dance","HipHop","Samba","Swing"]
-def GetGif(name):
-    image_file_path = "ICONS/"+name+".gif"
-    GIFS[name] = AnimatedGif(image_file_path)
-    
-Threads = []
-for name in names:
-    
-    Threads.append(threading.Thread(target = GetGif,args = (name,)))
-for thread1 in Threads:
-    thread1.start()
-for thread1 in Threads:
-    thread1.join()
-
-
-NumberofGifs = len(GIFS)
-CurrentGifNumber = 0
-CurrentImage = GIFS[names[CurrentGifNumber]]
-name =names[CurrentGifNumber]
-
-  
-button = tk.Button(m.gifsection,relief = tk.FLAT,command = nextAnimation,image=CurrentImage[0])  # display first frame initially
-button.pack()
-startAnimation()
-
-
 
 
 ##
@@ -723,6 +640,8 @@ if(osType== "Windows"):
     WindowsDevice.pack(padx = 20,pady=(0,20))
     m.firstScreen.pack()
 
+time.sleep(.5)
+Gifs.Start(m.root)
 
 
 StudentLevelObj,StudentLevelVar = m.drawDropDown(m.secondoption,"h.StudentLevel",[""])
